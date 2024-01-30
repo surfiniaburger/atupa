@@ -1,0 +1,6 @@
+name = "atupa"
+main = "src/index.js"
+compatibility_date = "2024-01-29"
+
+[ai]
+binding = "AI"
