@@ -13,12 +13,22 @@
       text-align: center;
     }
 
+    #content {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #1a1a1a;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(250, 249, 249, 0.1);
+      }
+
     header {
       background-color: #3498db;
-      color: #fff;
+      color: #0c0808;
       padding: 20px;
       font-size: 24px;
       font-weight: bold;
+      border-radius: 8px;
     }
     #loading-state {
       display: none;
@@ -91,27 +101,29 @@
   </style>
 </head>
 <body>
+  <div id="content">
+    <h1>Audio to Image Conversion</h1>
 
-  <h1>Audio to Image Conversion</h1>
-
-  <div id="loading-state">
-    <div class="spinner"></div>
-    <p>Loading...</p>
-  </div>
-
-  <form id="audioForm" enctype="multipart/form-data">
-    <label for="audio">Upload Audio File:</label>
-    <input type="file" id="audio" name="audio" accept="audio/*" required>
+    <div id="loading-state">
+      <div class="spinner"></div>
+      <p>Loading...</p>
+    </div>
+  
+    <form id="audioForm" enctype="multipart/form-data">
+      <label for="audio">Upload Audio File:</label>
+      <input type="file" id="audio" name="audio" accept="audio/*" required>
+      <br>
+      <button type="button" onclick="convertAudio()">Convert to Image</button>
+  
+    </form>
+  
     <br>
-    <button type="button" onclick="convertAudio()">Convert to Image</button>
-
-  </form>
-
-  <br>
-
-  <div id="resultImage">
-    <!-- Image will be displayed here -->
+  
+    <div id="resultImage">
+      <!-- Image will be displayed here -->
+    </div>
   </div>
+ 
 
   <script>
     async function convertAudio() {
