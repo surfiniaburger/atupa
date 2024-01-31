@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Text Translation</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    #content {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #1a1a1a;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(250, 249, 249, 0.1);
+    }
+
+    header {
+      background-color: #3498db;
+      color: #0c0808;
+      padding: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      border-radius: 8px;
+    }
+
+    form {
+      margin: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 18px;
+      color: #333;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      width: 100%;
+      margin-bottom: 20px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #3498db;
+      color: #fff;
+      padding: 15px 30px;
+      font-size: 18px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    #translatedText {
+      margin: 20px;
+      color: #fff;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div id="content">
+    <h1>Text Translation</h1>
+  
+    <form id="translationForm">
+      <label for="textToTranslate">Enter Text to Translate:</label>
+      <input type="text" id="textToTranslate" name="textToTranslate" required>
+      <br>
+      <button type="button" onclick="translateText()">Translate</button>
+    </form>
+  
+    <div id="translatedText">
+      <!-- Translated text will be displayed here -->
+    </div>
+  </div>
+
+  <script>
+    async function translateText() {
+      const textToTranslate = document.getElementById('textToTranslate').value.trim();
+      
+      if (!textToTranslate) {
+        alert('Please enter text for translation.');
+        return;
+      }
+
+      try {
+        const response = await fetch('/translate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ text: textToTranslate }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to translate text. Status: ${response.status}');
+        }
+
+        const result = await response.json();
+
+        // Display the translated text
+        const translatedText = document.getElementById('translatedText');
+        if (result.translatedText !== undefined) {
+           translatedText.textContent = `Translated Text: ${result.translatedText}`;
+        } else {
+               translatedText.textContent = 'No translation available';
+            }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error translating text.');
+      }
+    }
+  </script>
+</body>
+</html>

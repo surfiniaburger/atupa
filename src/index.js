@@ -3,10 +3,13 @@ import { Hono } from "hono";
 
 
 import atupa from "./template.html";
+import translate from "./translator.html";
 
 const app = new Hono();
 
 app.get("/", (c) => c.html(atupa));
+app.get("/b", (c) => c.html(translate));
+
 
 // Function to convert audio to text using Cloudflare AI
 async function convertAudioToText(audioBuffer, ai) {
@@ -77,6 +80,45 @@ async function generateImage(ai, prompt) {
 	  return c.json({ error: 'Error processing audio file' });
 	}
   });
+
+  // Function to translate text using Cloudflare AI
+async function translateText(ai, text, sourceLang, targetLang) {
+	const translationInputs = {
+	  text,
+	  source_lang: sourceLang,
+	  target_lang: targetLang,
+	};
+
+	try {
+	  const translationResponse = await ai.run('@cf/meta/m2m100-1.2b', translationInputs);
+	  return translationResponse.translated_text;
+	} catch (error) {
+	  console.error('Error translating text:', error);
+	  return 'Error translating text';
+	}
+  }
+
+  app.post("/translate", async (c) => {
+	const ai = new Ai(c.env.AI);
+
+	try {
+	  const formData = await c.req.formData();
+	  const textToTranslate = formData.get("text");
+
+	  if (!textToTranslate) {
+		return c.json({ error: "No text provided for translation" });
+	  }
+
+	  // Translate text using Cloudflare AI
+	  const translatedText = await translateText(ai, textToTranslate, 'en', 'fr');
+
+	  return new Response(JSON.stringify({ translatedText}));
+	} catch (error) {
+	  console.error('Error translating text:', error);
+	  return c.json({ error: 'Error translating text' });
+	}
+  });
+
 
   app.onError((err, c) => {
 	return c.text(err);
