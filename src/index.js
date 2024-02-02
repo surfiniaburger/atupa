@@ -10,6 +10,49 @@ const app = new Hono();
 app.get("/", (c) => c.html(atupa));
 app.get("/b", (c) => c.html(translate));
 
+// Function to save AI results to the database
+async function saveResultToDatabase(database, query, result) {
+	// Execute SQL to insert the query and result into the database
+	await database.prepare(`
+	  INSERT INTO query_results (query, result) VALUES (?, ?);
+	`).bind(query, result).run();
+  }
+
+function formatSentiment(sentimentResult) {
+	if (!sentimentResult || !sentimentResult.label || !sentimentResult.score) {
+	  return "Sentiment: N/A";
+	}
+
+	const sentimentText = `Sentiment: ${sentimentResult.label}, Score: ${sentimentResult.score}`;
+	return sentimentText;
+  }
+
+async function performSentimentAnalysis(text, ai) {
+	const sentimentInputs = {
+	  text,
+	};
+  
+	try {
+	  const sentimentResponse = await ai.run(
+		'@cf/huggingface/distilbert-sst-2-int8',
+		sentimentInputs
+	  );
+  
+	  return sentimentResponse[1]; // Assuming the model returns a single sentiment result
+	} catch (error) {
+	  console.error('Error performing sentiment analysis:', error);
+	  return { error: 'Error performing sentiment analysis' };
+	}
+  }
+
+// Function to save AI results to the database
+async function saveAnalysisResult(database, timestamp, text, sent, image) {
+	// Execute SQL to insert the query and result into the database
+	await database.prepare(`
+	  INSERT INTO classification (timestamp, text, sent, image) VALUES (?, ?, ?, ?);
+	`).bind(timestamp, text, sent, image).run();
+  }
+
 
 // Function to convert audio to text using Cloudflare AI
 async function convertAudioToText(audioBuffer, ai) {
@@ -21,11 +64,27 @@ async function convertAudioToText(audioBuffer, ai) {
 	const audioResponse = await ai.run('@cf/openai/whisper', audioInputs);
 	console.log("Model Response:", audioResponse);
 	const textResult = JSON.stringify(audioResponse.text);
+
+
 	 return textResult;
   } catch (error) {
 	console.error('Error converting audio to text:', error);
 	return { textResult: 'Error converting audio to text' }; // Return an error message
   }
+  }
+
+  async function processImage(ai, imageBuffer) {
+	const inputs = {
+	  image: [...new Uint8Array(imageBuffer)],
+	};
+  
+	try {
+	  const response = await ai.run('@cf/microsoft/resnet-50', inputs);
+	  return response;
+	} catch (error) {
+	  console.error('Error processing image:', error);
+	  return { error: 'Error processing image' };
+	}
   }
 
   // Common function for image generation
@@ -39,6 +98,7 @@ async function generateImage(ai, prompt) {
 		'@cf/stabilityai/stable-diffusion-xl-base-1.0',
 		inputs
 	  );
+
   
 	  return new Response(response, {
 		headers: {
@@ -59,6 +119,7 @@ async function generateImage(ai, prompt) {
   
   app.post("/audio-to-text", async (c) => {
 	const ai = new Ai(c.env.AI);
+	const database = c.env.DB;
 	
   
 	try {
@@ -74,7 +135,40 @@ async function generateImage(ai, prompt) {
 	  // Convert audio to text using Cloudflare AI
 	  const prompt = await convertAudioToText(audioBuffer, ai);
 
-	  return await generateImage(ai, prompt);
+	  // Use the database to save the AI response
+	  //await saveResultToDatabase(database, "Audio-to-Text Conversion", prompt);
+
+	  //const text = JSON.stringify(prompt.text);
+
+	  // Generate a unique identifier (timestamp in this example)
+	  //const timestamp = Date.now();
+
+	  // Perform sentiment analysis on the converted text
+      //const sentimentResult = await performSentimentAnalysis(text);
+
+	  // Format sentiment result as text
+     // const sent = formatSentiment(sentimentResult);
+	  //console.log(sent);
+
+	  // generate image
+	  const view = await generateImage(ai, prompt);
+
+	  // Classify image after generating it
+	  //const imageProcessingResult = await processImage(view);
+	 // console.log(imageProcessingResult);
+
+	 // const maxEntry = imageProcessingResult.reduce((max, current) => (current.score > max.score) ? current : max);
+
+      // Extract the label and score from the max entry
+      //const maxLabel = maxEntry.label;
+	 // const maxScore = maxEntry.score;
+      ///const image = JSON.stringify(maxLabel + ' ' + maxScore);
+	  //const image = imageProcessingResult;
+
+	  // Use the database to save the AI response
+     // await saveAnalysisResult(database, timestamp, text, sent, image);
+
+	  return view;
 	} catch (error) {
 	  console.error('Error processing audio file:', error);
 	  return c.json({ error: 'Error processing audio file' });
