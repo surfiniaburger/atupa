@@ -4,11 +4,13 @@ import { Hono } from "hono";
 
 import atupa from "./template.html";
 import translate from "./translator.html";
+import analyte from "./analysis.html";
 
 const app = new Hono();
 
 app.get("/", (c) => c.html(atupa));
 app.get("/b", (c) => c.html(translate));
+app.get("/c", (c) => c.html(analyte));
 
 // Function to save AI results to the database
 async function saveResultToDatabase(database, query, result) {
@@ -23,7 +25,7 @@ function formatSentiment(sentimentResult) {
 	  return "Sentiment: N/A";
 	}
 
-	const sentimentText = `Sentiment: ${sentimentResult.label}, Score: ${sentimentResult.score}`;
+	const sentimentText = `${sentimentResult.label}, Score: ${sentimentResult.score}`;
 	return sentimentText;
   }
 
@@ -210,6 +212,43 @@ async function translateText(ai, text, sourceLang, targetLang) {
 	} catch (error) {
 	  console.error('Error translating text:', error);
 	  return c.json({ error: 'Error translating text' });
+	}
+  });
+
+
+  app.post("/analysis", async (c) => {
+	const ai = new Ai(c.env.AI);
+
+	try {
+	  const formData = await c.req.formData();
+	  const audioFile = formData.get("audio");
+
+	  if (!audioFile) {
+		return c.json({ error: "No audio file uploaded" });
+	  }
+
+	  const audioBuffer = await audioFile.arrayBuffer();
+
+	  // Convert audio to text using Cloudflare AI
+	  const prompt = await convertAudioToText(audioBuffer, ai);
+
+	  // Perform sentiment analysis on the converted text
+      const sentimentResult = await performSentimentAnalysis(prompt, ai);
+
+	  // Format sentiment result as text
+      const sent = formatSentiment(sentimentResult);
+
+	  // generate image
+	  const view = await generateImage(ai, prompt);
+
+	  // Classify image after generating it
+	  const imageBuffer = await view.arrayBuffer();
+	  const imageProcessingResult = await processImage(ai, imageBuffer);
+
+	  return c.json({prompt, sent, imageProcessingResult});
+	} catch (error) {
+	  console.error('Error processing audio file:', error);
+	  return c.json({ error: 'Error processing audio file' });
 	}
   });
 
