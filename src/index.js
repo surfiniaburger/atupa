@@ -137,38 +137,8 @@ async function generateImage(ai, prompt) {
 	  // Convert audio to text using Cloudflare AI
 	  const prompt = await convertAudioToText(audioBuffer, ai);
 
-	  // Use the database to save the AI response
-	  //await saveResultToDatabase(database, "Audio-to-Text Conversion", prompt);
-
-	  //const text = JSON.stringify(prompt.text);
-
-	  // Generate a unique identifier (timestamp in this example)
-	  //const timestamp = Date.now();
-
-	  // Perform sentiment analysis on the converted text
-      //const sentimentResult = await performSentimentAnalysis(text);
-
-	  // Format sentiment result as text
-     // const sent = formatSentiment(sentimentResult);
-	  //console.log(sent);
-
 	  // generate image
 	  const view = await generateImage(ai, prompt);
-
-	  // Classify image after generating it
-	  //const imageProcessingResult = await processImage(view);
-	 // console.log(imageProcessingResult);
-
-	 // const maxEntry = imageProcessingResult.reduce((max, current) => (current.score > max.score) ? current : max);
-
-      // Extract the label and score from the max entry
-      //const maxLabel = maxEntry.label;
-	 // const maxScore = maxEntry.score;
-      ///const image = JSON.stringify(maxLabel + ' ' + maxScore);
-	  //const image = imageProcessingResult;
-
-	  // Use the database to save the AI response
-     // await saveAnalysisResult(database, timestamp, text, sent, image);
 
 	  return view;
 	} catch (error) {
