@@ -2,6 +2,9 @@ name = "atupa"
 main = "src/index.js"
 compatibility_date = "2024-01-29"
 
+account_id = "03ca965e895ced6f7d7f1ec8e27c8cba"
+workers_dev = true
+
 [ai]
 binding = "AI"
 
@@ -9,3 +12,7 @@ binding = "AI"
 binding = "DB" # i.e. available in your Worker on env.DB
 database_name = "atupa-data"
 database_id = "cdddc447-a636-4159-8b2d-b5c5ee776b78"
+
+[[r2_buckets]]
+binding = 'MY_BUCKET' # <~ valid JavaScript variable name
+bucket_name = 'atupa'
