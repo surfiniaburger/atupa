@@ -8,11 +8,6 @@ workers_dev = true
 [ai]
 binding = "AI"
 
-[[d1_databases]]
-binding = "DB" # i.e. available in your Worker on env.DB
-database_name = "atupa-data"
-database_id = "cdddc447-a636-4159-8b2d-b5c5ee776b78"
-
 [[r2_buckets]]
 binding = 'MY_BUCKET' # <~ valid JavaScript variable name
 bucket_name = 'atupa'
