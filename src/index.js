@@ -12,13 +12,6 @@ app.get("/", (c) => c.html(atupa));
 app.get("/b", (c) => c.html(translate));
 app.get("/c", (c) => c.html(analyte));
 
-// Function to save AI results to the database
-async function saveResultToDatabase(database, query, result) {
-	// Execute SQL to insert the query and result into the database
-	await database.prepare(`
-	  INSERT INTO query_results (query, result) VALUES (?, ?);
-	`).bind(query, result).run();
-  }
 
 function formatSentiment(sentimentResult) {
 	if (!sentimentResult || !sentimentResult.label || !sentimentResult.score) {
@@ -47,13 +40,6 @@ async function performSentimentAnalysis(text, ai) {
 	}
   }
 
-// Function to save AI results to the database
-async function saveAnalysisResult(database, timestamp, text, sent, image) {
-	// Execute SQL to insert the query and result into the database
-	await database.prepare(`
-	  INSERT INTO classification (timestamp, text, sent, image) VALUES (?, ?, ?, ?);
-	`).bind(timestamp, text, sent, image).run();
-  }
 
 
 // Function to convert audio to text using Cloudflare AI
