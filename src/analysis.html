@@ -178,15 +178,14 @@
 
         const resultImageProcessing = document.getElementById('resultImageProcessing');
 
-        // Now, initiate the PUT operation to the Cloudflare Worker endpoint to store the image in the R2 bucket
-        await uploadImageToBucket(prompt + ' ' + sent + ' ' + JSON.stringify(imageProcessingResult));
-
         if (response.ok) {
         resultImageProcessing.innerHTML = `<p>Classification Result:</p><pre>${JSON.stringify(imageProcessingResult, null, 2)}</pre>`;
 
       } else {
         resultImageProcessing.innerHTML = `<p>Error: ${imageProcessingResult.error}</p>`;
       }
+      // Now, initiate the PUT operation to the Cloudflare Worker endpoint to store the image in the R2 bucket
+        await uploadImageToBucket(prompt + ' ' + sent + ' ' + JSON.stringify(imageProcessingResult));
       } catch (error) {
         console.error('Error:', error);
         alert('Error processing audio.');
